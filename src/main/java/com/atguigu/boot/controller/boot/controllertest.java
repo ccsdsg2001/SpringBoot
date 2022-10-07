@@ -1,5 +1,6 @@
 package com.atguigu.boot.controller.boot;
 
+import com.atguigu.boot.pojo.Person;
 import com.atguigu.boot.pojo.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,18 @@ public class controllertest {
 
     @Autowired
     User user;
+    @Autowired
+    Person person;
 
     @RequestMapping("/use")
     public User user(){
         return user;
     }
 
+    @RequestMapping("/person")
+    public Person person(){
+        return person();
+    }
 
     @RequestMapping("/hello")
     public String hall()
