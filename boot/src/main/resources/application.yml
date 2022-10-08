@@ -1,0 +1,11 @@
+spring:
+  mvc:
+#    开启restful风格
+    hiddenmethod:
+      filter:
+        enabled: true
+#    static-path-pattern: /res/**
+
+#  web:
+#    resources:
+#      static-locations: classpath:/h/
