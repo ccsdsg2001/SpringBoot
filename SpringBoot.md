@@ -1218,7 +1218,7 @@ public class ResourceProperties {
 
 ##### 0.请求映射
 
-##### 1.rest使用与原理
+###### 1.rest使用与原理
 
 ●@xxxMapping；
 
@@ -1302,7 +1302,7 @@ spring:
 
 
 
-##### 2.请求映射原理
+###### 2.请求映射原理
 
 ![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603181171918-b8acfb93-4914-4208-9943-b37610e93864.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_27%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
 
@@ -1370,4 +1370,409 @@ protected void doDispatch(HttpServletRequest request, HttpServletResponse respon
 
 
 
-# P29
+##### 1.普通参数与基本注解
+
+###### 1.1 注解
+
+@PathVariable、@RequestHeader、@ModelAttribute、@RequestParam、@MatrixVariable、@CookieValue、@RequestBody
+
+```java
+@RestController
+public class ParameterTestController {
+
+
+    //  car/2/owner/zhangsan
+    @GetMapping("/car/{id}/owner/{username}")
+    public Map<String,Object> getCar(@PathVariable("id") Integer id,
+                                     @PathVariable("username") String name,
+                                     @PathVariable Map<String,String> pv,
+                                     @RequestHeader("User-Agent") String userAgent,
+                                     @RequestHeader Map<String,String> header,
+                                     @RequestParam("age") Integer age,
+                                     @RequestParam("inters") List<String> inters,
+                                     @RequestParam Map<String,String> params,
+                                     @CookieValue("_ga") String _ga,
+                                     @CookieValue("_ga") Cookie cookie){
+
+
+        Map<String,Object> map = new HashMap<>();
+
+//        map.put("id",id);
+//        map.put("name",name);
+//        map.put("pv",pv);
+//        map.put("userAgent",userAgent);
+//        map.put("headers",header);
+        map.put("age",age);
+        map.put("inters",inters);
+        map.put("params",params);
+        map.put("_ga",_ga);
+        System.out.println(cookie.getName()+"===>"+cookie.getValue());
+        return map;
+    }
+
+
+    @PostMapping("/save")
+    public Map postMethod(@RequestBody String content){
+        Map<String,Object> map = new HashMap<>();
+        map.put("content",content);
+        return map;
+    }
+
+
+    //1、语法： 请求路径：/cars/sell;low=34;brand=byd,audi,yd
+    //2、SpringBoot默认是禁用了矩阵变量的功能
+    //      手动开启：原理。对于路径的处理。UrlPathHelper进行解析。
+    //              removeSemicolonContent（移除分号内容）支持矩阵变量的
+    //3、矩阵变量必须有url路径变量才能被解析
+    @GetMapping("/cars/{path}")
+    public Map carsSell(@MatrixVariable("low") Integer low,
+                        @MatrixVariable("brand") List<String> brand,
+                        @PathVariable("path") String path){
+        Map<String,Object> map = new HashMap<>();
+
+        map.put("low",low);
+        map.put("brand",brand);
+        map.put("path",path);
+        return map;
+    }
+
+    // /boss/1;age=20/2;age=10
+
+    @GetMapping("/boss/{bossId}/{empId}")
+    public Map boss(@MatrixVariable(value = "age",pathVar = "bossId") Integer bossAge,
+                    @MatrixVariable(value = "age",pathVar = "empId") Integer empAge){
+        Map<String,Object> map = new HashMap<>();
+
+        map.put("bossAge",bossAge);
+        map.put("empAge",empAge);
+        return map;
+
+    }
+
+}
+```
+
+
+
+###### 1.2 Servlet API:
+
+WebRequest、ServletRequest、MultipartRequest、 HttpSession、javax.servlet.http.PushBuilder、Principal、InputStream、Reader、HttpMethod、Locale、TimeZone、ZoneId
+
+
+
+**ServletRequestMethodArgumentResolver  以上的部分参数**
+
+```java
+@Override
+	public boolean supportsParameter(MethodParameter parameter) {
+		Class<?> paramType = parameter.getParameterType();
+		return (WebRequest.class.isAssignableFrom(paramType) ||
+				ServletRequest.class.isAssignableFrom(paramType) ||
+				MultipartRequest.class.isAssignableFrom(paramType) ||
+				HttpSession.class.isAssignableFrom(paramType) ||
+				(pushBuilder != null && pushBuilder.isAssignableFrom(paramType)) ||
+				Principal.class.isAssignableFrom(paramType) ||
+				InputStream.class.isAssignableFrom(paramType) ||
+				Reader.class.isAssignableFrom(paramType) ||
+				HttpMethod.class == paramType ||
+				Locale.class == paramType ||
+				TimeZone.class == paramType ||
+				ZoneId.class == paramType);
+	}
+```
+
+
+
+###### 1.3 复杂参数
+
+**Map、Model**（**map、model里面的数据会被放在request的请求域  request.setAttribute**）、Errors/BindingResult、**RedirectAttributes（ 重定向携带数据**）、ServletResponse（**response**）、SessionStatus、UriComponentsBuilder、ServletUriComponentsBuilder
+
+```java
+Map<String,Object> map,  Model model, HttpServletRequest request 都是可以给request域中放数据，
+request.getAttribute();
+```
+
+**Map、Model类型的参数**，会返回 mavContainer.getModel（）；---> BindingAwareModelMap 是Model 也是Map
+
+**mavContainer**.getModel(); 获取到值的
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603271442869-63b4c3c7-c721-4074-987d-cbe5999273ae.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![ss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_28%2Ctext_YXRndWln](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603271678813-d8e1a1e5-94fa-412c-a7f1-6f27174fd127.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603271813894-037be041-92a5-49af-a49c-c350b3dd587a.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_27%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+###### 1.4 自定义对象参数:
+
+可以自动类型转换与格式化，可以级联封装。
+
+```java
+/**
+ *     姓名： <input name="userName"/> <br/>
+ *     年龄： <input name="age"/> <br/>
+ *     生日： <input name="birth"/> <br/>
+ *     宠物姓名：<input name="pet.name"/><br/>
+ *     宠物年龄：<input name="pet.age"/>
+ */
+@Data
+public class Person {
+    
+    private String userName;
+    private Integer age;
+    private Date birth;
+    private Pet pet;
+    
+}
+
+@Data
+public class Pet {
+
+    private String name;
+    private String age;
+
+}
+
+result
+```
+
+
+
+##### 2.POJO封装过程
+
+**ServletModelAttributeMethodProcessor**
+
+##### 3. 参数处理原理
+
+●HandlerMapping中找到能处理请求的Handler（Controller.method()）
+●为当前Handler 找一个适配器 HandlerAdapter； RequestMappingHandlerAdapter
+●适配器执行目标方法并确定方法参数的每一个值
+
+###### 1.HandlerAdapter
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603262942726-107353bd-f8b7-44f6-93cf-2a3cad4093cf.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_18%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+0 - 支持方法上标注@RequestMapping
+1 - 支持函数式编程的
+xxxxxx
+
+###### 2.执行目标方法
+
+```java
+// Actually invoke the handler.
+//DispatcherServlet -- doDispatch
+mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+```
+
+```java
+
+mav = invokeHandlerMethod(request, response, handlerMethod); //执行目标方法
+
+
+//ServletInvocableHandlerMethod
+Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
+//获取方法的参数值
+Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
+```
+
+###### 3.参数解析器-HandlerMethodArgumentResolver
+
+确定将要执行的目标方法的每一个参数的值是什么;
+SpringMVC目标方法能写多少种参数类型。取决于参数解析器。
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603263283504-85bbd4d5-a9af-4dbf-b6a2-30b409868774.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_20%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603263394724-33122714-9d06-42ec-bf45-e440e8b49c05.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+●当前解析器是否支持解析这种参数
+●支持就调用 resolveArgument
+
+###### 4.返回值处理器
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603263524227-386da4be-43b1-4b17-a2cc-8cf886346af9.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_22%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+###### 5.如何确定目标方法的每一个参数的值
+
+```java
+============InvocableHandlerMethod==========================
+protected Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
+			Object... providedArgs) throws Exception {
+
+		MethodParameter[] parameters = getMethodParameters();
+		if (ObjectUtils.isEmpty(parameters)) {
+			return EMPTY_ARGS;
+		}
+
+		Object[] args = new Object[parameters.length];
+		for (int i = 0; i < parameters.length; i++) {
+			MethodParameter parameter = parameters[i];
+			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
+			args[i] = findProvidedArgument(parameter, providedArgs);
+			if (args[i] != null) {
+				continue;
+			}
+			if (!this.resolvers.supportsParameter(parameter)) {
+				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
+			}
+			try {
+				args[i] = this.resolvers.resolveArgument(parameter, mavContainer, request, this.dataBinderFactory);
+			}
+			catch (Exception ex) {
+				// Leave stack trace for later, exception may actually be resolved and handled...
+				if (logger.isDebugEnabled()) {
+					String exMsg = ex.getMessage();
+					if (exMsg != null && !exMsg.contains(parameter.getExecutable().toGenericString())) {
+						logger.debug(formatArgumentError(parameter, exMsg));
+					}
+				}
+				throw ex;
+			}
+		}
+		return args;
+	}
+```
+
+###### 5.1 挨个判断所有参数解析器那个支持解析这个参数
+
+```java
+	@Nullable
+	private HandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
+		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
+		if (result == null) {
+			for (HandlerMethodArgumentResolver resolver : this.argumentResolvers) {
+				if (resolver.supportsParameter(parameter)) {
+					result = resolver;
+					this.argumentResolverCache.put(parameter, result);
+					break;
+				}
+			}
+		}
+		return result;
+	}
+```
+
+###### 5.2 解析这个参数的值
+
+```java
+调用各自 HandlerMethodArgumentResolver 的 resolveArgument 方法即可
+```
+
+###### 5.3 自定义类型参数 封装POJO
+
+ServletModelAttributeMethodProcessor  这个参数处理器支持
+是否为简单类型。
+
+```java
+public static boolean isSimpleValueType(Class<?> type) {
+		return (Void.class != type && void.class != type &&
+				(ClassUtils.isPrimitiveOrWrapper(type) ||
+				Enum.class.isAssignableFrom(type) ||
+				CharSequence.class.isAssignableFrom(type) ||
+				Number.class.isAssignableFrom(type) ||
+				Date.class.isAssignableFrom(type) ||
+				Temporal.class.isAssignableFrom(type) ||
+				URI.class == type ||
+				URL.class == type ||
+				Locale.class == type ||
+				Class.class == type));
+	}
+```
+
+```java
+@Override
+	@Nullable
+	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
+
+		Assert.state(mavContainer != null, "ModelAttributeMethodProcessor requires ModelAndViewContainer");
+		Assert.state(binderFactory != null, "ModelAttributeMethodProcessor requires WebDataBinderFactory");
+
+		String name = ModelFactory.getNameForParameter(parameter);
+		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		if (ann != null) {
+			mavContainer.setBinding(name, ann.binding());
+		}
+
+		Object attribute = null;
+		BindingResult bindingResult = null;
+
+		if (mavContainer.containsAttribute(name)) {
+			attribute = mavContainer.getModel().get(name);
+		}
+		else {
+			// Create attribute instance
+			try {
+				attribute = createAttribute(name, parameter, binderFactory, webRequest);
+			}
+			catch (BindException ex) {
+				if (isBindExceptionRequired(parameter)) {
+					// No BindingResult parameter -> fail with BindException
+					throw ex;
+				}
+				// Otherwise, expose null/empty value and associated BindingResult
+				if (parameter.getParameterType() == Optional.class) {
+					attribute = Optional.empty();
+				}
+				bindingResult = ex.getBindingResult();
+			}
+		}
+
+		if (bindingResult == null) {
+			// Bean property binding and validation;
+			// skipped in case of binding failure on construction.
+			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
+			if (binder.getTarget() != null) {
+				if (!mavContainer.isBindingDisabled(name)) {
+					bindRequestParameters(binder, webRequest);
+				}
+				validateIfApplicable(binder, parameter);
+				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
+					throw new BindException(binder.getBindingResult());
+				}
+			}
+			// Value type adaptation, also covering java.util.Optional
+			if (!parameter.getParameterType().isInstance(attribute)) {
+				attribute = binder.convertIfNecessary(binder.getTarget(), parameter.getParameterType(), parameter);
+			}
+			bindingResult = binder.getBindingResult();
+		}
+
+		// Add resolved attribute and BindingResult at the end of the model
+		Map<String, Object> bindingResultModel = bindingResult.getModel();
+		mavContainer.removeAttributes(bindingResultModel);
+		mavContainer.addAllAttributes(bindingResultModel);
+
+		return attribute;
+	}
+```
+
+**WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);**
+**WebDataBinder :web数据绑定器，将请求参数的值绑定到指定的JavaBean里面**
+**WebDataBinder 利用它里面的 Converters 将请求数据转成指定的数据类型。再次封装到JavaBean中**
+
+
+
+**GenericConversionService：在设置每一个值的时候，找它里面的所有converter那个可以将这个数据类型（request带来参数的字符串）转换到指定的类型（JavaBean -- Integer）**
+**byte -- > file**
+
+
+
+@FunctionalInterfacepublic interface Converter<S, T>
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603337871521-25fc1aa1-133a-4ce0-a146-d565633d7658.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_39%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1603338486441-9bbd22a9-813f-49bd-b51b-e66c7f4b8598.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_44%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fresize%2Cw_750%2Climit_0)
+
+
+
+未来我们可以给WebDataBinder里面放自己的Converter；
+**private static final class StringToNumber<T extends Number> implements Converter<String, T>**
+
+
+
+
+
+# p36

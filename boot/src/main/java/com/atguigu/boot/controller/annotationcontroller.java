@@ -1,5 +1,6 @@
 package com.atguigu.boot.controller;
 
+import com.atguigu.boot.bean.Person;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -68,6 +69,11 @@ public class annotationcontroller {
 
     }
 
+
+    @PostMapping("/saveuser")
+    public Person sa(Person pseron){
+        return pseron;
+    }
 
 
 
