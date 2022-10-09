@@ -1,9 +1,6 @@
 package com.atguigu.boot.controller;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author cc
@@ -18,8 +15,8 @@ public class contest {
         return "aaa";
     }
 
-    @DeleteMapping("/delete")
-    public String cs(){
+    @DeleteMapping("/delete/")
+    public String cs(@PathVariable("nam") String name){
         return null;
     }
 }
