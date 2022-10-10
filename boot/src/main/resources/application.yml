@@ -4,6 +4,8 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+    contentnegotiation:
+      favor-parameter: true #开启请求参数协商模式
 #    static-path-pattern: /res/**
 
 
