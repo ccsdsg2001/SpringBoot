@@ -11,4 +11,7 @@ spring:
 
 #  web:
 #    resources:
+#server:
+#  servlet:
+#    context-path:
 #      static-locations: classpath:/h/

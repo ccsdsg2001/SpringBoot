@@ -9,6 +9,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="boot" />
+        <module name="springbootweb" />
         <module name="SpringBoot" />
       </profile>
     </annotationProcessing>
@@ -18,6 +19,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="SpringBoot" options="-parameters" />
       <module name="boot" options="-parameters" />
+      <module name="springbootweb" options="-parameters" />
     </option>
   </component>
 </project>
