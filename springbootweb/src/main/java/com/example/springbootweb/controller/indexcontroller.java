@@ -41,14 +41,15 @@ public class indexcontroller {
     public String mainPage(HttpSession session,Model model){
 
         //是否登录 使用拦截器 或者 过滤器
-
-        Object user = session.getAttribute("loginUser");
-        if (user!=null) {
-            return "main";
-        }else {
-            model.addAttribute("msg", "错误");
-            return "login";
-        }
+//
+//        Object user = session.getAttribute("loginUser");
+//        if (user!=null) {
+//            return "main";
+//        }else {
+//            model.addAttribute("msg", "错误");
+//            return "login";
+//        }
+        return "main";
 
 
 
