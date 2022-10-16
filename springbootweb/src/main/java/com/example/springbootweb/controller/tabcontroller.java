@@ -23,10 +23,10 @@ public class tabcontroller {
     @GetMapping("/dynamic_table")
     public String basic_t1able(){
 
-        //表格内容遍历
-        Arrays.asList(new User("zhangsan","123"),
-                new User("sad","123456"),new User("sd","123"));
-
+//        //表格内容遍历
+//        Arrays.asList(new User("zhangsan","123"),
+//                new User("sad","123456"),new User("sd","123"));
+//
 
 
         return "table/dynamic_table";

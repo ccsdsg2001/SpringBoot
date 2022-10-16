@@ -1,14 +1,21 @@
 package com.example.springbootweb.controller;
 
+import com.example.springbootweb.bean.Account;
 import com.example.springbootweb.bean.User;
+import com.example.springbootweb.bean.book;
+import com.example.springbootweb.service.accountservice;
+import com.example.springbootweb.service.bookservice;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 
 /**
  * @author cc
@@ -16,6 +23,34 @@ import javax.websocket.Session;
  */
 @Controller
 public class indexcontroller {
+
+
+
+
+    @Autowired
+    accountservice accountservice;
+
+    @Autowired
+    com.example.springbootweb.service.bookservice bookservice;
+
+    @GetMapping("/book")
+    @ResponseBody
+    public book boook(@RequestParam("id") long id){
+        return (book) bookservice.getBook(id);
+
+
+    }
+
+
+
+
+    @GetMapping("/acct")
+    @ResponseBody
+    public Account getnyid(@RequestParam("id") Integer id){
+
+        return accountservice.GETBYID(id);
+
+    }
 
     @GetMapping("/")
     public String loginpage(){
