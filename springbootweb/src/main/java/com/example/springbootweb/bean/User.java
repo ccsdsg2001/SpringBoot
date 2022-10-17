@@ -1,6 +1,7 @@
 package com.example.springbootweb.bean;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.sun.org.apache.xalan.internal.xsltc.util.IntegerArray;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+//@TableName
 @AllArgsConstructor
 public class User {
 

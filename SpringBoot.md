@@ -6,28 +6,28 @@
 
 ```xml
 <mirrors>
-      <mirror>
+    <mirror>
         <id>nexus-aliyun</id>
         <mirrorOf>central</mirrorOf>
         <name>Nexus aliyun</name>
         <url>http://maven.aliyun.com/nexus/content/groups/public</url>
-      </mirror>
-  </mirrors>
- 
-  <profiles>
-         <profile>
-              <id>jdk-1.8</id>
-              <activation>
-                <activeByDefault>true</activeByDefault>
-                <jdk>1.8</jdk>
-              </activation>
-              <properties>
-                <maven.compiler.source>1.8</maven.compiler.source>
-                <maven.compiler.target>1.8</maven.compiler.target>
-                <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-              </properties>
-         </profile>
-  </profiles>
+    </mirror>
+</mirrors>
+
+<profiles>
+<profile>
+    <id>jdk-1.8</id>
+    <activation>
+        <activeByDefault>true</activeByDefault>
+        <jdk>1.8</jdk>
+    </activation>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+    </properties>
+</profile>
+</profiles>
 ```
 
 ## 2.HelloWold
@@ -3357,3 +3357,149 @@ public interface CityMapper {
 
 优点：
 ● 只需要我们的Mapper继承 BaseMapper 就可以拥有crud能力
+
+
+
+##### 3.CRUD功能
+
+```java
+    @GetMapping("/user/delete/{id}")
+    public String deleteUser(@PathVariable("id") Long id,
+                             @RequestParam(value = "pn",defaultValue = "1")Integer pn,
+                             RedirectAttributes ra){
+
+        userService.removeById(id);
+
+        ra.addAttribute("pn",pn);
+        return "redirect:/dynamic_table";
+    }
+
+
+    @GetMapping("/dynamic_table")
+    public String dynamic_table(@RequestParam(value="pn",defaultValue = "1") Integer pn,Model model){
+        //表格内容的遍历
+//        response.sendError
+//     List<User> users = Arrays.asList(new User("zhangsan", "123456"),
+//                new User("lisi", "123444"),
+//                new User("haha", "aaaaa"),
+//                new User("hehe ", "aaddd"));
+//        model.addAttribute("users",users);
+//
+//        if(users.size()>3){
+//            throw new UserTooManyException();
+//        }
+        //从数据库中查出user表中的用户进行展示
+
+        //构造分页参数
+        Page<User> page = new Page<>(pn, 2);
+        //调用page进行分页
+        Page<User> userPage = userService.page(page, null);
+
+
+//        userPage.getRecords()
+//        userPage.getCurrent()
+//        userPage.getPages()
+
+
+        model.addAttribute("users",userPage);
+
+        return "table/dynamic_table";
+    }
+```
+
+```java
+@Service
+public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements UserService {
+
+
+}
+
+public interface UserService extends IService<User> {
+
+}
+```
+
+
+
+### 2.NoSQL
+
+Redis 是一个开源（BSD许可）的，内存中的数据结构存储系统，它可以用作数据库、缓存和消息中间件。 它支持多种类型的数据结构，如 [字符串（strings）](http://www.redis.cn/topics/data-types-intro.html#strings)， [散列（hashes）](http://www.redis.cn/topics/data-types-intro.html#hashes)， [列表（lists）](http://www.redis.cn/topics/data-types-intro.html#lists)， [集合（sets）](http://www.redis.cn/topics/data-types-intro.html#sets)， [有序集合（sorted sets）](http://www.redis.cn/topics/data-types-intro.html#sorted-sets) 与范围查询， [bitmaps](http://www.redis.cn/topics/data-types-intro.html#bitmaps)， [hyperloglogs](http://www.redis.cn/topics/data-types-intro.html#hyperloglogs) 和 [地理空间（geospatial）](http://www.redis.cn/commands/geoadd.html) 索引半径查询。 Redis 内置了 [复制（replication）](http://www.redis.cn/topics/replication.html)，[LUA脚本（Lua scripting）](http://www.redis.cn/commands/eval.html)， [LRU驱动事件（LRU eviction）](http://www.redis.cn/topics/lru-cache.html)，[事务（transactions）](http://www.redis.cn/topics/transactions.html) 和不同级别的 [磁盘持久化（persistence）](http://www.redis.cn/topics/persistence.html)， 并通过 [Redis哨兵（Sentinel）](http://www.redis.cn/topics/sentinel.html)和自动 [分区（Cluster）](http://www.redis.cn/topics/cluster-tutorial.html)提供高可用性（high availability）。
+
+
+
+#### 1.Redis自动配置
+
+```xml
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+```
+
+![](https://cdn.nlark.com/yuque/0/2020/png/1354552/1606745732785-17d1227a-75b9-4f00-a3f1-7fc4137b5113.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_17%2Ctext_YXRndWlndS5jb20g5bCa56GF6LC3%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10)
+
+自动配置：
+●RedisAutoConfiguration 自动配置类。RedisProperties 属性类 --> spring.redis.xxx是对redis的配置
+●连接工厂是准备好的。LettuceConnectionConfiguration、JedisConnectionConfiguration
+●自动注入了RedisTemplate<Object, Object> ： xxxTemplate；
+**	●**自动注入了StringRedisTemplate；k：v都是String
+
+* *●	**key：value
+  **●*	*底层只要我们使用 StringRedisTemplate、RedisTemplate就可以操作redis
+
+
+
+
+
+redis环境搭建
+1、阿里云按量付费redis。经典网络
+2、申请redis的公网连接地址
+3、修改白名单  允许0.0.0.0/0 访问
+
+
+
+#### 2.RedisTemplate与Lettuce
+
+```java
+    @Test
+    void testRedis(){
+        ValueOperations<String, String> operations = redisTemplate.opsForValue();
+
+        operations.set("hello","world");
+
+        String hello = operations.get("hello");
+        System.out.println(hello);
+    }
+```
+
+
+
+#### 3.切换至Jedis
+
+```xml
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+<!--        导入jedis-->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+```
+
+
+
+```yaml
+spring:
+  redis:
+      host: r-bp1nc7reqesxisgxpipd.redis.rds.aliyuncs.com
+      port: 6379
+      password: lfy:Lfy123456
+      client-type: jedis
+      jedis:
+        pool:
+          max-active: 10
+```
+

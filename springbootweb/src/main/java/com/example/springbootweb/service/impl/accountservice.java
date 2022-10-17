@@ -1,7 +1,8 @@
-package com.example.springbootweb.service;
+package com.example.springbootweb.service.impl;
 
 import com.example.springbootweb.Mapper.accMapper;
 import com.example.springbootweb.bean.Account;
+import com.example.springbootweb.service.accountser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ import java.awt.print.Book;
  */
 
 @Service
-public class accountservice {
+public class accountservice  implements accountser {
 
     @Autowired
     accMapper mapper;

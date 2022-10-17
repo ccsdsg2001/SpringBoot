@@ -3,10 +3,10 @@ package com.example.springbootweb.controller;
 import com.example.springbootweb.bean.Account;
 import com.example.springbootweb.bean.User;
 import com.example.springbootweb.bean.book;
-import com.example.springbootweb.service.accountservice;
-import com.example.springbootweb.service.bookservice;
+import com.example.springbootweb.service.impl.accountservice;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -24,6 +24,9 @@ import javax.servlet.http.HttpSession;
 @Controller
 public class indexcontroller {
 
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+
 
 
 
@@ -31,7 +34,7 @@ public class indexcontroller {
     accountservice accountservice;
 
     @Autowired
-    com.example.springbootweb.service.bookservice bookservice;
+    com.example.springbootweb.service.impl.bookservice bookservice;
 
     @GetMapping("/book")
     @ResponseBody
@@ -84,6 +87,14 @@ public class indexcontroller {
 //            model.addAttribute("msg", "错误");
 //            return "login";
 //        }
+        ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+        String s = ops.get("/main.html");
+        String s1 = ops.get("/sql");
+
+
+        model.addAttribute("count",s);
+        model.addAttribute("countmain",s1);
+
         return "main";
 
 

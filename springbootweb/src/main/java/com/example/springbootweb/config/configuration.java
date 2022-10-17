@@ -1,6 +1,8 @@
 package com.example.springbootweb.config;
 
 import com.example.springbootweb.intercepter.interce;
+import com.example.springbootweb.intercepter.redisinter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.MethodWrapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -16,6 +18,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class configuration implements WebMvcConfigurer {
 
+    //filete是serlet定义原生组件 脱离spring可使用
+    //2.interceptor是spring 定义接口,有自动装配功能
+    @Autowired
+    redisinter redisinter;
+
 //定义静态资源行为
 //    @Override
 //    public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -28,5 +35,10 @@ public class configuration implements WebMvcConfigurer {
         registry.addInterceptor(new interce())
                 .addPathPatterns("/**")
                 .excludePathPatterns("/","/login","/css/**","/fonts/**","/images/**","/js/**");
+
+
+        registry.addInterceptor(redisinter).addPathPatterns("/**")
+                .excludePathPatterns("/","/login","/css/**","/fonts/**","/images/**","/js/**");
+
     }
 }
