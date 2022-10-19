@@ -41,6 +41,7 @@ spring:
     database: 0
     client-type: jedis
 
+
 mybatis:
   config-location: classpath:mybatis-config.xml
   mapper-locations: classpath:mybatis/mapper/*.xml
@@ -48,9 +49,26 @@ mybatis:
     map-underscore-to-camel-case: true
 management:
   endpoints:
-    enabled-by-default: true
+    enabled-by-default: false
     web:
       exposure:
         include: '*'
 
 
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+
+    info:
+        enabled: true
+
+    beans:
+      enabled: true
+
+    metrics:
+      enabled: true
+info:
+  appName: boot-admin
+  appVersion: 1.0.0
+  mavernProjectName: @project.artfactId@
